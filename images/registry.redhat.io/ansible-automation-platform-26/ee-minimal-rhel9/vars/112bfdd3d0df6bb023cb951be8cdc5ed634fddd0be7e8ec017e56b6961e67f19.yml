@@ -10,8 +10,7 @@
   ansible_core_version: "2.16.19"
   python_version: "3.12.13"
   rhel_version: "9.8 (Plow)"
-  ansible_collections:
-    - "ERROR: ansible-galaxy collection list failed (rc 5)"
+  ansible_collections: []
   system_packages:
     - "redhat-release 9.8-1.0.el9"
     - "gpg-pubkey fd431d51-4ae0493b"
@@ -248,5 +247,3 @@
     - "yamllint==1.35.1"
     - "yarl==1.23.0"
     - "zipp==4.1.0"
-  inspection_errors:
-    - "ansible-galaxy collection list failed (rc 5)"

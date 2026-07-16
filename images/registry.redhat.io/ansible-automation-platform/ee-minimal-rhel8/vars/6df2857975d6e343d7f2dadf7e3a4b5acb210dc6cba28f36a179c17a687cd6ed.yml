@@ -9,8 +9,7 @@
   ansible_core_version: "2.17.14"
   python_version: "3.11.13"
   rhel_version: "8.10 (Ootpa)"
-  ansible_collections:
-    - "ERROR: ansible-galaxy collection list failed (rc 5)"
+  ansible_collections: []
   system_packages:
     - "gpg-pubkey fd431d51-4ae0493b"
     - "libgcc 8.5.0-28.el8_10"
@@ -234,5 +233,3 @@
     - "xmltodict==0.13.0"
     - "yamllint==1.33.0"
     - "yarl==1.14.0"
-  inspection_errors:
-    - "ansible-galaxy collection list failed (rc 5)"

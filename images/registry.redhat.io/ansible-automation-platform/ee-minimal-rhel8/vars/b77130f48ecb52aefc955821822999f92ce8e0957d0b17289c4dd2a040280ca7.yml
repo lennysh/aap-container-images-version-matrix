@@ -8,8 +8,7 @@ b77130f48ecb52aefc955821822999f92ce8e0957d0b17289c4dd2a040280ca7:
   ansible_core_version: "2.18.0"
   python_version: "3.11.10"
   rhel_version: "8.10 (Ootpa)"
-  ansible_collections:
-    - "ERROR: ansible-galaxy collection list failed (rc 5)"
+  ansible_collections: []
   system_packages:
     - "crypto-policies 20230731-1.git3177e06.el8"
     - "redhat-release 8.10-0.3.el8"
@@ -231,5 +230,3 @@ b77130f48ecb52aefc955821822999f92ce8e0957d0b17289c4dd2a040280ca7:
     - "xmltodict==0.13.0"
     - "yamllint==1.33.0"
     - "yarl==1.9.4"
-  inspection_errors:
-    - "ansible-galaxy collection list failed (rc 5)"

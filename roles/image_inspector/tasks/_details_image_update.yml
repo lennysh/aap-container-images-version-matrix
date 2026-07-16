@@ -53,6 +53,8 @@
           changed_when: false
           failed_when: false
 
+        # ee-minimal images often omit collection dirs entirely; ansible-galaxy exits
+        # rc 5 ("None of the provided paths were usable") unless at least one path exists.
         - name: ↳ Get Ansible collections
           vars:
             __python_version: >-
@@ -63,22 +65,34 @@
                 ).split('.')[:2] | join('.')
                 | default(image_inspector_default_python_version, true)
               }}
-            __ansible_collections_paths: >-
-              {{
-                '/usr/share/ansible/collections:/usr/share/ansible/ansible_collections'
-                ~ ':/usr/local/lib/python' ~ __python_version
-                ~ '/site-packages/ansible/_internal/ansible_collections'
-              }}
           ansible.builtin.command:
             argv:
               - podman
               - run
               - --rm
               - "{{ full_image_ref }}"
-              - ansible-galaxy
-              - collection
-              - list
-              - --collections-path={{ __ansible_collections_paths }}
+              - bash
+              - -c
+              - |
+                set -euo pipefail
+                py_maj_min='{{ __python_version }}'
+                candidates=(
+                  /usr/share/ansible/collections
+                  /usr/share/ansible/ansible_collections
+                  "/usr/local/lib/python${py_maj_min}/site-packages/ansible/_internal/ansible_collections"
+                )
+                paths=()
+                for candidate in "${candidates[@]}"; do
+                  if [[ -d "${candidate}" ]]; then
+                    paths+=("${candidate}")
+                  fi
+                done
+                if [[ "${#paths[@]}" -eq 0 ]]; then
+                  mkdir -p /tmp/empty_ansible_collections
+                  paths=(/tmp/empty_ansible_collections)
+                fi
+                IFS=:
+                ansible-galaxy collection list --collections-path="${paths[*]}"
           register: collections_output
           changed_when: false
           failed_when: false

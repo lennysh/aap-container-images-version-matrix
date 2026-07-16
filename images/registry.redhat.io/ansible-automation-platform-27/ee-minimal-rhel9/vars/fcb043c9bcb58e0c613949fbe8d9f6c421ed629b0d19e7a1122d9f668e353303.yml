@@ -9,8 +9,7 @@ fcb043c9bcb58e0c613949fbe8d9f6c421ed629b0d19e7a1122d9f668e353303:
   ansible_core_version: "2.16.18"
   python_version: "3.12.13"
   rhel_version: "9.8 (Plow)"
-  ansible_collections:
-    - "ERROR: ansible-galaxy collection list failed (rc 5)"
+  ansible_collections: []
   system_packages:
     - "redhat-release 9.8-1.0.el9"
     - "gpg-pubkey fd431d51-4ae0493b"
@@ -226,5 +225,3 @@ fcb043c9bcb58e0c613949fbe8d9f6c421ed629b0d19e7a1122d9f668e353303:
     - "urllib3==1.26.19"
     - "xmltodict==1.0.4"
     - "yarl==1.23.0"
-  inspection_errors:
-    - "ansible-galaxy collection list failed (rc 5)"
