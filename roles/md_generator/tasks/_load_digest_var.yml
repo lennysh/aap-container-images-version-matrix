@@ -1,9 +1,0 @@
----
-- name: Load one digest vars file
-  ansible.builtin.include_vars:
-    file: "{{ digest_var_file.path }}"
-    name: _digest_image
-
-- name: Append digest to images list
-  ansible.builtin.set_fact:
-    images: "{{ images | default([]) + [_digest_image] }}"

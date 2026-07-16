@@ -1,57 +1,70 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/lennysh/lennysh-aap-execution-environments-version-matrix/schemas/image_digest.schema.json",
-  "title": "Image digest inspection record",
-  "description": "Per-digest Ansible vars file under images/<image_path>/vars/<digest-hex>.yml",
+  "title": "Image digest inspection record file",
+  "description": "Per-digest Ansible vars file under images/<image_path>/vars/<digest-hex>.yml. Top-level key is the digest hex (matches filename) so include_vars dir can load an entire vars/ folder in one task.",
   "type": "object",
+  "minProperties": 1,
+  "maxProperties": 1,
+  "patternProperties": {
+    "^[0-9a-f]{64}$": {
+      "$ref": "#/$defs/digestRecord"
+    }
+  },
   "additionalProperties": false,
-  "required": ["digest", "image_tags", "created"],
-  "properties": {
-    "digest": {
-      "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
-    },
-    "image_tags": {
-      "type": "array",
-      "items": {
-        "type": ["string", "number"]
-      },
-      "minItems": 1
-    },
-    "created": {
-      "type": "string"
-    },
-    "ansible_core_version": {
-      "type": ["string", "number"]
-    },
-    "python_version": {
-      "type": "string"
-    },
-    "rhel_version": {
-      "type": "string"
-    },
-    "ansible_collections": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "system_packages": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "pip_packages": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "inspection_errors": {
-      "type": "array",
-      "items": {
-        "type": "string"
+  "$defs": {
+    "digestRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "image_tags", "created"],
+      "properties": {
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "image_tags": {
+          "type": "array",
+          "items": {
+            "type": ["string", "number"]
+          },
+          "minItems": 1
+        },
+        "created": {
+          "type": "string"
+        },
+        "ansible_core_version": {
+          "type": ["string", "number"]
+        },
+        "python_version": {
+          "type": "string"
+        },
+        "rhel_version": {
+          "type": "string"
+        },
+        "ansible_collections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "system_packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pip_packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "inspection_errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     }
   }

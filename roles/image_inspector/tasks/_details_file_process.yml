@@ -11,7 +11,16 @@
 - name: Load digest vars from file
   ansible.builtin.include_vars:
     file: "{{ __file.path }}"
-    name: image
+    name: _digest_file
+
+- name: Unwrap digest record from vars file
+  ansible.builtin.set_fact:
+    image: >-
+      {{
+        _digest_file
+        if _digest_file.digest is defined
+        else (_digest_file.values() | first)
+      }}
 
 - name: Set current_data for image update tasks
   ansible.builtin.set_fact:

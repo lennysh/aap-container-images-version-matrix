@@ -60,24 +60,23 @@
         - item.stdout is defined
         - item.stdout != ""
 
-    # 2. Load existing per-digest vars files
-    - name: Find existing digest var files
-      ansible.builtin.find:
-        paths: "{{ vars_dir }}"
-        patterns: "*.yml"
-        file_type: file
-      register: existing_var_files
+    # 2. Load existing per-digest vars files (one task per image path, not per file)
+    - name: Load all existing digest vars files
+      ansible.builtin.include_vars:
+        dir: "{{ vars_dir }}"
+        extensions:
+          - yml
+        ignore_files:
+          - .merged_tmp.yml
+        name: _digests_by_hex
 
-    - name: Initialize existing images by digest dictionary
+    - name: Build existing images by digest dictionary
       ansible.builtin.set_fact:
-        existing_images_by_digest: {}
-
-    - name: Load each existing digest vars file
-      ansible.builtin.include_tasks: _load_existing_digest.yml
-      loop: "{{ existing_var_files.files | default([]) }}"
-      loop_control:
-        loop_var: digest_var_file
-        label: "{{ digest_var_file.path | basename }}"
+        existing_images_by_digest: >-
+          {{ dict(
+               (_digests_by_hex.values() | map(attribute='digest') | list)
+               | zip(_digests_by_hex.values() | list)
+             ) }}
 
     # 3. Merge remote and existing data, write per-digest vars files
     - name: Render merged image list

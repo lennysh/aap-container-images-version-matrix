@@ -1,9 +1,0 @@
----
-- name: Load existing digest vars file
-  ansible.builtin.include_vars:
-    file: "{{ digest_var_file.path }}"
-    name: _loaded_digest
-
-- name: Add digest to existing lookup dictionary
-  ansible.builtin.set_fact:
-    existing_images_by_digest: "{{ existing_images_by_digest | default({}) | combine({_loaded_digest.digest: _loaded_digest}) }}"

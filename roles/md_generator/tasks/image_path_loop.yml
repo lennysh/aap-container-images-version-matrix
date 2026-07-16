@@ -9,27 +9,18 @@
         | regex_replace('/vars$', '')
       }}
 
-- name: Find digest vars files for image path
-  ansible.builtin.find:
-    paths: "{{ __vars_dir.path }}"
-    patterns: "*.yml"
-    file_type: file
-  register: digest_var_files
-
-- name: Initialize images list for template
-  ansible.builtin.set_fact:
-    images: []
-
 - name: Load all digest vars files for image path
-  ansible.builtin.include_tasks: _load_digest_var.yml
-  loop: "{{ digest_var_files.files }}"
-  loop_control:
-    loop_var: digest_var_file
-    label: "{{ digest_var_file.path | basename }}"
+  ansible.builtin.include_vars:
+    dir: "{{ __vars_dir.path }}"
+    extensions:
+      - yml
+    ignore_files:
+      - .merged_tmp.yml
+    name: _digests_by_hex
 
-- name: Sort images by created date descending
+- name: Build sorted images list for template
   ansible.builtin.set_fact:
-    images: "{{ images | sort(attribute='created', reverse=True) }}"
+    images: "{{ _digests_by_hex.values() | list | sort(attribute='created', reverse=True) }}"
 
 - name: "Ensure the output directory exists"
   ansible.builtin.file:

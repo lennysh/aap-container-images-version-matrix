@@ -1,4 +1,4 @@
-{# Render one per-digest Ansible vars file with stable key order and YAML indentation. #}
+{# Render one per-digest Ansible vars file keyed by digest hex for bulk include_vars dir loading. #}
 {%- set ansible_jinja_vars = {'trim_blocks': True, 'lstrip_blocks': True} -%}
 {%- set field_order = [
   'digest',
@@ -12,20 +12,21 @@
   'pip_packages',
   'inspection_errors'
 ] -%}
-{%- set ns = namespace(lines=['---']) -%}
+{%- set digest_hex = digest_record.digest | regex_replace('^sha256:', '') -%}
+{%- set ns = namespace(lines=['---', digest_hex ~ ':']) -%}
 {%- for key in field_order -%}
   {%- if digest_record[key] is defined and digest_record[key] is not none -%}
     {%- if digest_record[key] is iterable and digest_record[key] is not string -%}
       {%- if digest_record[key] | length == 0 -%}
-        {%- set _ = ns.lines.append(key ~ ': []') -%}
+        {%- set _ = ns.lines.append('  ' ~ key ~ ': []') -%}
       {%- else -%}
-        {%- set _ = ns.lines.append(key ~ ':') -%}
+        {%- set _ = ns.lines.append('  ' ~ key ~ ':') -%}
         {%- for item in digest_record[key] -%}
-          {%- set _ = ns.lines.append('  - ' ~ (item | string | to_json)) -%}
+          {%- set _ = ns.lines.append('    - ' ~ (item | string | to_json)) -%}
         {%- endfor -%}
       {%- endif -%}
     {%- else -%}
-      {%- set _ = ns.lines.append(key ~ ': ' ~ (digest_record[key] | to_json)) -%}
+      {%- set _ = ns.lines.append('  ' ~ key ~ ': ' ~ (digest_record[key] | to_json)) -%}
     {%- endif -%}
   {%- endif -%}
 {%- endfor -%}

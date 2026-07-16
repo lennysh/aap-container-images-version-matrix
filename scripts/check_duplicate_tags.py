@@ -13,6 +13,18 @@ from pathlib import Path
 import yaml
 
 
+def load_digest_record(data: dict | None, fallback_hex: str) -> dict | None:
+    if not data:
+        return None
+    if "digest" in data:
+        return data
+    if len(data) == 1:
+        record = next(iter(data.values()))
+        if isinstance(record, dict) and "digest" in record:
+            return record
+    return None
+
+
 def check_duplicate_tags(vars_dir: Path) -> tuple[dict | None, str | None]:
     """Check for duplicate tags across all digest vars files in a vars/ directory."""
     digest_files = sorted(vars_dir.glob("*.yml"))
@@ -22,12 +34,15 @@ def check_duplicate_tags(vars_dir: Path) -> tuple[dict | None, str | None]:
     tag_to_digests: dict[str, set[str]] = defaultdict(set)
 
     for digest_file in digest_files:
+        if digest_file.name == ".merged_tmp.yml":
+            continue
         try:
             with digest_file.open() as f:
-                image = yaml.safe_load(f)
+                raw = yaml.safe_load(f)
         except Exception as exc:
             return None, f"{digest_file.name}: {exc}"
 
+        image = load_digest_record(raw, digest_file.stem)
         if not image:
             continue
 
