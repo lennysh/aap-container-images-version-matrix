@@ -1,66 +1,20 @@
 ---
-- name: Derive image_path from digest vars file location
-  ansible.builtin.set_fact:
-    digest_image_path: >-
-      {{
-        (__file.path | dirname)
-        | regex_replace('^' ~ image_inspector_output_dir ~ '/', '')
-        | regex_replace('/' ~ image_inspector_vars_subdir ~ '$', '')
-      }}
-
-- name: Load digest vars from file
-  ansible.builtin.include_vars:
-    file: "{{ __file.path }}"
-    name: _digest_file
-
-- name: Unwrap digest record from vars file
-  ansible.builtin.set_fact:
-    image: >-
-      {{
-        _digest_file
-        if _digest_file.digest is defined
-        else (_digest_file.values() | first)
-      }}
+# Expects __work: { image, image_path, vars_file } from details.yml pre-filter.
 
 - name: Set current_data for image update tasks
   ansible.builtin.set_fact:
+    image: "{{ __work.image }}"
     current_data:
-      image_path: "{{ digest_image_path }}"
+      image_path: "{{ __work.image_path }}"
+    processed_images: []
 
-- name: Determine if digest needs re-inspection
-  ansible.builtin.set_fact:
-    needs_update: >-
-      {{
-        image.ansible_core_version is not defined
-        or image.ansible_core_version | string in ['', 'pull_failed']
-        or image.python_version is not defined
-        or image.rhel_version is not defined
-        or image.system_packages is not defined
-        or image.pip_packages is not defined
-        or image.ansible_collections is not defined
-        or image.image_tags is not defined
-        or (image.inspection_errors | default([]) | length > 0)
-        or (
-          image.ansible_collections | default([]) | length > 0
-          and image.ansible_collections[0] is string
-          and ('ERROR:' in image.ansible_collections[0])
-        )
-      }}
+- name: Inspect details for digest
+  ansible.builtin.include_tasks: _details_image_update.yml
 
-- name: Inspect and save updated digest vars file
-  when: needs_update | bool
-  block:
-    - name: Initialize processed_images list for this digest
-      ansible.builtin.set_fact:
-        processed_images: []
-
-    - name: Inspect details for digest
-      ansible.builtin.include_tasks: _details_image_update.yml
-
-    - name: Save updated digest vars file
-      ansible.builtin.template:
-        src: digest_var.yml.j2
-        dest: "{{ __file.path }}"
-        mode: '0644'
-      vars:
-        digest_record: "{{ processed_images[0] }}"
+- name: Save updated digest vars file
+  ansible.builtin.template:
+    src: digest_var.yml.j2
+    dest: "{{ __work.vars_file }}"
+    mode: '0644'
+  vars:
+    digest_record: "{{ processed_images[0] }}"

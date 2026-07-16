@@ -8,22 +8,11 @@
     recurse: true
   register: vars_dirs
 
-- name: Find digest vars files in each directory
-  ansible.builtin.find:
-    paths: "{{ item.path }}"
-    patterns: "*.yml"
-    file_type: file
-  loop: "{{ vars_dirs.files }}"
-  register: digest_var_file_lists
-
-- name: Build flat list of digest vars files for configured image paths
+- name: Filter vars directories to configured image paths
   ansible.builtin.set_fact:
-    digest_var_files: >-
+    details_vars_dirs: >-
       {{
-        digest_var_file_lists.results
-        | map(attribute='files')
-        | flatten
-        | rejectattr('path', 'search', '/\\.merged_tmp\\.yml$')
+        vars_dirs.files
         | selectattr(
             'path',
             'search',
@@ -33,14 +22,32 @@
             ~ (image_inspector_image_paths | map('regex_escape') | join('|'))
             ~ ')/'
             ~ (image_inspector_vars_subdir | regex_escape)
-            ~ '/'
+            ~ '$'
           )
         | list
       }}
 
-- name: Process each digest vars file
-  ansible.builtin.include_tasks: _details_file_process.yml
-  loop: "{{ digest_var_files }}"
+- name: Initialize digests needing re-inspection
+  ansible.builtin.set_fact:
+    digests_needing_update: []
+
+- name: Collect digests needing re-inspection (bulk load per image path)
+  ansible.builtin.include_tasks: _details_collect_stale.yml
+  loop: "{{ details_vars_dirs }}"
   loop_control:
-    loop_var: __file
-    label: "{{ __file.path | basename }}"
+    loop_var: __vars_dir
+    label: "{{ __vars_dir.path | regex_replace('^' ~ image_inspector_output_dir ~ '/', '') }}"
+
+- name: Report digests needing re-inspection
+  ansible.builtin.debug:
+    msg: >-
+      {{ digests_needing_update | length }} digest(s) need re-inspection
+      (of {{ details_vars_dirs | length }} image path(s)).
+
+- name: Process digests needing re-inspection
+  ansible.builtin.include_tasks: _details_file_process.yml
+  loop: "{{ digests_needing_update }}"
+  loop_control:
+    loop_var: __work
+    label: "{{ __work.image_path }}@{{ __work.image.digest[-12:] }}"
+  when: digests_needing_update | length > 0

@@ -70,6 +70,10 @@ created: 2026-05-05 09:15:54 UTC
 After `details`, fields such as `ansible_core_version`, `python_version`, `rhel_version`,
 `ansible_collections`, `system_packages`, and `pip_packages` are populated.
 
+`details` bulk-loads each image path’s `vars/` directory and pulls only digests that are
+missing inspection fields, marked `pull_failed`, or still have `inspection_errors`. When
+nothing needs updating, the tag finishes after that filter (no per-digest task loop).
+
 Role Variables
 --------------
 
