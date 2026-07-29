@@ -19,7 +19,7 @@
             '^'
             ~ (image_inspector_output_dir | regex_escape)
             ~ '/('
-            ~ (image_inspector_image_paths | map('regex_escape') | join('|'))
+            ~ (image_inspector_image_path_list | map('regex_escape') | join('|'))
             ~ ')/'
             ~ (image_inspector_vars_subdir | regex_escape)
             ~ '$'

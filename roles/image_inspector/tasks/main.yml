@@ -6,24 +6,43 @@
     path: "{{ image_inspector_output_dir }}"
     state: directory
     mode: '0755'
+  tags: [discover, details]
 
-# - name: Find all image var files to process
-#   ansible.builtin.find:
-#     paths: "{{ image_inspector_var_root_path }}"
-#     patterns: "*.yml"
-#     recurse: true
-#   register: yaml_files
-#   tags: [always, discover]
+# Normalize plain strings or {path, exclude_patterns} into a common list.
+- name: Normalize image path configuration
+  vars:
+    _normalized_images: >-
+      {%- set ns = namespace(items=[]) -%}
+      {%- for item in image_inspector_image_paths -%}
+        {%- if item is string -%}
+          {%- set entry = {
+                'path': item,
+                'exclude_patterns': image_inspector_exclude_patterns | list
+              } -%}
+        {%- else -%}
+          {%- set entry = {
+                'path': item.path,
+                'exclude_patterns': (
+                  (image_inspector_exclude_patterns | list)
+                  + (item.exclude_patterns | default([]) | list)
+                ) | unique | list
+              } -%}
+        {%- endif -%}
+        {%- set _ = ns.items.append(entry) -%}
+      {%- endfor -%}
+      {{ ns.items }}
+  ansible.builtin.set_fact:
+    image_inspector_images: "{{ _normalized_images }}"
+    image_inspector_image_path_list: "{{ _normalized_images | map(attribute='path') | list }}"
+  tags: [discover, details]
 
-# - name: Include and loop over discovery tasks for each image path
-#   ansible.builtin.include_tasks:
-#     file: discover.yml
-#     apply:
-#       tags: [discover]
-#   tags: [always, discover]
-#   loop: "{{ yaml_files.files | map(attribute='path') | list }}"
-#   loop_control:
-#     loop_var: image_path
+- name: Verify podman registry login
+  ansible.builtin.include_tasks:
+    file: verify_registry_auth.yml
+    apply:
+      tags: [discover, details]
+  tags: [discover, details]
+  when: image_inspector_require_registry_login | bool
 
 - name: Include and loop over discovery tasks for each image path
   ansible.builtin.include_tasks:
@@ -31,9 +50,10 @@
     apply:
       tags: [discover]
   tags: [discover]
-  loop: "{{ image_inspector_image_paths }}"
+  loop: "{{ image_inspector_images }}"
   loop_control:
-    loop_var: discover_image_path
+    loop_var: discover_image
+    label: "{{ discover_image.path }}"
 
 - name: Include image detail tasks
   ansible.builtin.include_tasks:

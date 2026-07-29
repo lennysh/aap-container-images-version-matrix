@@ -1,9 +1,11 @@
 ---
 # This file is looped over for each discover_image_path
 
-- name: "Discovering images for: {{ discover_image_path }}"
+- name: "Discovering images for: {{ discover_image.path }}"
   vars:
-    vars_dir: "{{ image_inspector_output_dir }}/{{ discover_image_path }}/{{ image_inspector_vars_subdir }}"
+    discover_image_path: "{{ discover_image.path }}"
+    vars_dir: "{{ image_inspector_output_dir }}/{{ discover_image.path }}/{{ image_inspector_vars_subdir }}"
+    discover_exclude_patterns: "{{ discover_image.exclude_patterns }}"
   block:
     - name: Ensure vars output directory exists
       ansible.builtin.file:
@@ -11,56 +13,59 @@
         state: directory
         mode: '0755'
 
-    # 1. Fetch all remote tags and digests
-    - name: Fetch remote tags from registry
-      ansible.builtin.shell:
-        cmd: >
-          set -o pipefail &&
-          podman search --limit 1000 --list-tags "{{ discover_image_path }}" |
-          tail -n +2 | awk '{print $2}'
-      register: remote_tags_raw
-      changed_when: false
+    # 1. List tags (skopeo list-tags) + parallel inspect, aggregated by digest
+    - name: List tags and inspect in parallel
+      discover_remote_digests:
+        image: "{{ discover_image_path }}"
+        exclude_patterns: "{{ discover_exclude_patterns }}"
+        jobs: "{{ image_inspector_skopeo_jobs }}"
+        retries: "{{ image_inspector_skopeo_retries }}"
+        retry_delay: "{{ image_inspector_skopeo_retry_delay }}"
+        retry_backoff: "{{ image_inspector_skopeo_retry_backoff }}"
+      register: remote_inspect
 
-    - name: Filter out excluded tags from the list
-      ansible.builtin.set_fact:
-        filtered_tags: >
-          {{ remote_tags_raw.stdout_lines |
-            reject('regex', '.*(' + (image_inspector_exclude_patterns | join('|')) + ').*') |
-            list }}
+    - name: Warn about permanently rejected tags
+      ansible.builtin.debug:
+        msg: >-
+          {{ remote_inspect.permanent_failed_tags | length }} tag(s) rejected by
+          registry policy (excluded from transient failures):
+          {{ remote_inspect.permanent_failed_tags[:20] }}{{ '...' if (remote_inspect.permanent_failed_tags | length) > 20 else '' }}.
+          Errors: {{ remote_inspect.permanent_failed_tag_errors }}
+      when: remote_inspect.permanent_failed_tags | default([]) | length > 0
 
-    - name: Inspect each tag to get its digest and creation date
-      ansible.builtin.shell:
-        cmd: "skopeo inspect --format '{{ '{{' }}.Digest{{ \"}}\" }},{{ '{{' }}.Created.Format \"2006-01-02 15:04:05 MST\"{{ \"}}\" }}' \"docker://{{ discover_image_path }}:{{ item }}\"" # noqa: yaml[line-length]
-      register: inspect_results
-      loop: "{{ filtered_tags }}"
-      loop_control:
-        label: "{{ discover_image_path }}@{{ item }}"
-      failed_when: false
-      changed_when: false
+    - name: Warn about tags that failed inspect after retries
+      ansible.builtin.debug:
+        msg: >-
+          {{ remote_inspect.failed_tags | length }} tag(s) failed skopeo inspect
+          after retries and will be preserved on existing digests:
+          {{ remote_inspect.failed_tags[:20] }}{{ '...' if (remote_inspect.failed_tags | length) > 20 else '' }}.
+          Errors: {{ remote_inspect.failed_tag_errors }}
+      when: remote_inspect.failed_tags | length > 0
 
-    - name: Initialize remote images by digest dictionary
-      ansible.builtin.set_fact:
-        remote_images_by_digest: {}
-
-    - name: Aggregate remote tags by digest
-      ansible.builtin.set_fact:
-        remote_images_by_digest: >
-          {{ remote_images_by_digest | default({}) | combine({
-              item.stdout.split(',')[0]: {
-                'image_tags': (remote_images_by_digest[item.stdout.split(',')[0]].image_tags | default([]) + [item.item]) | sort,
-                'created': item.stdout.split(',')[1]
-              }
-            }, recursive=true) }}
-      loop: "{{ inspect_results.results }}"
-      loop_control:
-        label: "{{ discover_image_path }}@{{ item.item }}"
+    - name: Fail when tag inspects remain incomplete
+      ansible.builtin.fail:
+        msg: >-
+          Discover incomplete for {{ discover_image_path }}:
+          {{ remote_inspect.failed_tags | length }} tag(s) still failed after
+          retries ({{ image_inspector_skopeo_retries }}). Refusing to continue
+          with a possibly incomplete remote digest set.
+          Failed: {{ remote_inspect.failed_tags }}
+          Errors: {{ remote_inspect.failed_tag_errors }}
+          Tip: lower image_inspector_skopeo_jobs, raise
+          image_inspector_skopeo_retries, or set
+          image_inspector_fail_on_failed_tags=false to preserve tags and skip
+          prune instead of failing.
       when:
-        - item.rc is defined
-        - item.rc == 0
-        - item.stdout is defined
-        - item.stdout != ""
+        - image_inspector_fail_on_failed_tags | bool
+        - remote_inspect.failed_tags | length > 0
 
-    # 2. Load existing per-digest vars files (one task per image path, not per file)
+    - name: Set remote images by digest
+      ansible.builtin.set_fact:
+        remote_images_by_digest: "{{ remote_inspect.images_by_digest }}"
+        remote_failed_tags: "{{ remote_inspect.failed_tags }}"
+        remote_listed_tags: "{{ remote_inspect.tags }}"
+
+    # 2. Load existing per-digest vars files (one task per image path)
     - name: Load all existing digest vars files
       ansible.builtin.include_vars:
         dir: "{{ vars_dir }}"
@@ -78,37 +83,91 @@
                | zip(_digests_by_hex.values() | list)
              ) }}
 
-    # 3. Merge remote and existing data, write per-digest vars files
-    - name: Render merged image list
-      ansible.builtin.template:
-        src: merged_images.yml.j2
-        dest: "{{ vars_dir }}/.merged_tmp.yml"
-        mode: '0600'
+    # 3. Write only new digests or digests whose image_tags changed.
+    #    Tags that failed inspect are kept on their existing digest so a
+    #    transient registry error cannot delete live tags from vars files.
+    - name: Build digest records that need writing
+      vars:
+        _digests_to_write: >-
+          {%- set ns = namespace(items=[]) -%}
+          {%- set failed = remote_failed_tags | default([]) | map('string') | list -%}
+          {%- for digest, remote in remote_images_by_digest.items() -%}
+            {%- set existing = existing_images_by_digest[digest] | default(none) -%}
+            {%- set remote_tags = remote.image_tags | default([]) | map('string') | list -%}
+            {%- if existing is none -%}
+              {%- set _ = ns.items.append({
+                    'digest': digest,
+                    'image_tags': remote_tags | sort,
+                    'created': remote.created
+                  }) -%}
+            {%- else -%}
+              {%- set existing_tags = (
+                    existing.image_tags | default(existing.tags | default([]))
+                    | map('string') | list
+                  ) -%}
+              {%- set preserved = existing_tags | select('in', failed) | list -%}
+              {%- set merged_tags = (remote_tags + preserved) | unique | list | sort -%}
+              {%- if (existing_tags | sort) != merged_tags -%}
+                {%- set _ = ns.items.append(
+                      existing | combine({'image_tags': merged_tags})
+                    ) -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ ns.items }}
+      ansible.builtin.set_fact:
+        digests_to_write: "{{ _digests_to_write }}"
 
-    - name: Load merged image list
-      ansible.builtin.include_vars:
-        file: "{{ vars_dir }}/.merged_tmp.yml"
-        name: _merged_data
+    - name: Report discover write plan
+      ansible.builtin.debug:
+        msg: >-
+          {{ digests_to_write | length }} digest(s) to write
+          ({{ remote_images_by_digest | length }} remote,
+          {{ existing_images_by_digest | length }} existing,
+          {{ remote_listed_tags | length }} tags inspected,
+          {{ remote_failed_tags | length }} failed).
 
-    - name: Write per-digest vars files
+    - name: Write new or changed digest vars files
       ansible.builtin.template:
         src: digest_var.yml.j2
         dest: "{{ vars_dir }}/{{ item.digest | regex_replace('^sha256:', '') }}.yml"
         mode: '0644'
       vars:
         digest_record: "{{ item }}"
-      loop: "{{ _merged_data.images }}"
+      loop: "{{ digests_to_write }}"
       loop_control:
         label: "{{ item.digest[-12:] }}"
-
-    - name: Remove temporary merged file
-      ansible.builtin.file:
-        path: "{{ vars_dir }}/.merged_tmp.yml"
-        state: absent
+      when: digests_to_write | length > 0
 
     - name: Compute stale digests for pruning
+      vars:
+        _failed_tags: "{{ remote_failed_tags | default([]) | map('string') | list }}"
+        _digests_protected_by_failed_tags: >-
+          {%- set ns = namespace(digests=[]) -%}
+          {%- for digest, image in existing_images_by_digest.items() -%}
+            {%- set tags = image.image_tags | default(image.tags | default([])) | map('string') | list -%}
+            {%- if (tags | select('in', _failed_tags) | list | length) > 0 -%}
+              {%- set _ = ns.digests.append(digest) -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ ns.digests }}
       ansible.builtin.set_fact:
-        stale_digests: "{{ existing_images_by_digest.keys() | list | difference(remote_images_by_digest.keys() | list) }}"
+        stale_digests: >-
+          {{
+            existing_images_by_digest.keys() | list
+            | difference(remote_images_by_digest.keys() | list)
+            | difference(_digests_protected_by_failed_tags)
+          }}
+
+    - name: Skip prune when tag inspects failed
+      ansible.builtin.debug:
+        msg: >-
+          Skipping prune for {{ discover_image_path }}:
+          {{ remote_failed_tags | length }} tag(s) failed inspect, so the remote
+          digest set may be incomplete.
+      when:
+        - image_inspector_prune_images | bool
+        - remote_failed_tags | default([]) | length > 0
 
     - name: Remove pruned digest vars files
       ansible.builtin.file:
@@ -117,4 +176,6 @@
       loop: "{{ stale_digests }}"
       loop_control:
         label: "{{ item[-12:] }}"
-      when: image_inspector_prune_images
+      when:
+        - image_inspector_prune_images | bool
+        - remote_failed_tags | default([]) | length == 0

@@ -1,0 +1,51 @@
+---
+# Fail fast when podman is not logged into registries used by image_inspector_image_paths.
+
+- name: Derive registries from configured image paths
+  ansible.builtin.set_fact:
+    image_inspector_registries: >-
+      {{
+        image_inspector_image_path_list
+        | map('split', '/')
+        | map('first')
+        | unique
+        | list
+      }}
+
+- name: Check podman login for each registry
+  ansible.builtin.command:
+    argv:
+      - podman
+      - login
+      - --get-login
+      - "{{ item }}"
+  register: image_inspector_login_checks
+  changed_when: false
+  failed_when: false
+  loop: "{{ image_inspector_registries }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Fail when registry login is missing
+  ansible.builtin.fail:
+    msg: >-
+      Not logged in to registry '{{ item.item }}' (podman login --get-login failed).
+      Run: podman login {{ item.item }}
+  loop: "{{ image_inspector_login_checks.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - image_inspector_require_registry_login | bool
+    - item.rc | default(1) != 0
+
+- name: Report authenticated registries
+  ansible.builtin.debug:
+    msg: >-
+      Authenticated to {{ item.item }} as {{ item.stdout | trim }}
+  loop: "{{ image_inspector_login_checks.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - item.rc | default(1) == 0
+    - item.stdout is defined
+    - item.stdout | trim | length > 0

@@ -87,7 +87,7 @@
                     paths+=("${candidate}")
                   fi
                 done
-                if [[ "${#paths[@]}" -eq 0 ]]; then
+                if [[ -z "${paths[*]}" ]]; then
                   mkdir -p /tmp/empty_ansible_collections
                   paths=(/tmp/empty_ansible_collections)
                 fi
@@ -161,20 +161,29 @@
       ansible.builtin.set_fact:
         original_tags: "{{ original_tags | default(image.image_tags | default([]) | list) }}"
 
+    - name: ↳ Fail clearly when inspection never built processed_image
+      ansible.builtin.fail:
+        msg: >-
+          Inspection did not produce processed_image for {{ full_image_ref }}
+          (digest {{ image.digest }}). An earlier task in this block likely failed
+          before assembly completed.
+      when: processed_image is not defined
+
     - name: ↳ Verify processed_image has correct digest and image_tags
       ansible.builtin.assert:
         that:
-          - processed_image is defined
           - processed_image.digest == image.digest
           - processed_image.image_tags | sort == original_tags | sort
         fail_msg: >-
           ERROR: processed_image image_tags don't match original for digest {{ image.digest }}!
           Original image_tags: {{ original_tags }}
           Processed image_tags: {{ processed_image.image_tags }}
+      when: processed_image is defined
 
     - name: ↳ Add image to the list
       ansible.builtin.set_fact:
         processed_images: "{{ processed_images | default([]) + [processed_image] }}"
+      when: processed_image is defined
 
     - name: "✅ Remove pulled image: {{ full_image_ref }}"
       ansible.builtin.command: "podman rmi {{ full_image_ref }}"

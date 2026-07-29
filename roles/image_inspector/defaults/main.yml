@@ -4,30 +4,37 @@
 # The root path where the image VAR files are located
 image_inspector_var_root_path: "{{ playbook_dir }}/images"
 
-# A list of container image paths to query
+# Images to discover/inspect. Each entry is a dict:
+#   path: registry/repo (required)
+#   exclude_patterns: optional extra regexes merged with image_inspector_exclude_patterns
+# Plain strings are still accepted and treated as {path: "<string>"}.
 image_inspector_image_paths:
-  - "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8"
-  - "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel9"
-  - "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel8"
-  - "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9"
-  - "registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel8"
-  - "registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9"
-  - "registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8"
-  - "registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9"
-  - "registry.redhat.io/ansible-automation-platform-25/ee-supported-rhel8"
-  - "registry.redhat.io/ansible-automation-platform-25/ee-supported-rhel9"
-  - "registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9"
-  # - "registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel10"
-  - "registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel9"
-  # - "registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel10"
-  - "registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9"
-  # - "registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel10"
-  - "registry.redhat.io/ansible-automation-platform-27/ee-supported-rhel9"
-  # - "registry.redhat.io/ansible-automation-platform-27/ee-supported-rhel10"
-  - "registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel8"
-  - "registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel9"
+  - path: "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8"
+    exclude_patterns:
+      - "^latest$"
+  - path: "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel9"
+    exclude_patterns:
+      - "^latest$"
+  - path: "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel8"
+  - path: "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9"
+  - path: "registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel8"
+  - path: "registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9"
+  - path: "registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8"
+  - path: "registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9"
+  - path: "registry.redhat.io/ansible-automation-platform-25/ee-supported-rhel8"
+  - path: "registry.redhat.io/ansible-automation-platform-25/ee-supported-rhel9"
+  - path: "registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9"
+  # - path: "registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel10"
+  - path: "registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel9"
+  # - path: "registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel10"
+  - path: "registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9"
+  # - path: "registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel10"
+  - path: "registry.redhat.io/ansible-automation-platform-27/ee-supported-rhel9"
+  # - path: "registry.redhat.io/ansible-automation-platform-27/ee-supported-rhel10"
+  - path: "registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel8"
+  - path: "registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel9"
 
-# A list of string patterns to exclude from tag discovery results
+# Global tag exclude regexes (applied to every image, then per-image exclude_patterns)
 image_inspector_exclude_patterns:
   - "-source"
   - "sha256"
@@ -44,3 +51,19 @@ image_inspector_prune_images: "{{ prune_images | default(false) }}"
 
 # The default Python version to use for Ansible collections path
 image_inspector_default_python_version: "3.12"
+
+# Parallel skopeo inspect workers during discover (per image path).
+# Keep modest — Quay CDN EOFs climb under high concurrency.
+image_inspector_skopeo_jobs: 4
+
+# Transient inspect / list-tags retries (plus a serial cleanup pass)
+image_inspector_skopeo_retries: 5
+image_inspector_skopeo_retry_delay: 1.0
+image_inspector_skopeo_retry_backoff: 2.0
+
+# Fail the discover task if any tag still fails after retries (recommended).
+# Set false only if you want preserve-tags + skip-prune instead of aborting.
+image_inspector_fail_on_failed_tags: true
+
+# Fail fast unless podman is logged into registries used by image paths
+image_inspector_require_registry_login: true

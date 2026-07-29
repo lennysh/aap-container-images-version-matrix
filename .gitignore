@@ -3,3 +3,4 @@ archive/
 .vscode/*
 output/
 **/.merged_tmp.yml
+**/__pycache__/

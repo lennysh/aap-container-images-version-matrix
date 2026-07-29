@@ -59,7 +59,10 @@ ansible-playbook md_generator.yml
 
 **Discover** (`--tags discover`) queries the registry and writes one Ansible vars file
 per digest to `images/<image_path>/vars/<digest-hex>.yml` with `digest`, `image_tags`,
-and `created`. It is safe to run regularly to pick up new tags.
+and `created`. It retries flaky registry/CDN errors, skips permanent policy rejects
+(such as disallowed `latest`), and by default aborts if any tag still fails after
+retries so prune never runs on incomplete data. It is safe to run regularly to pick
+up new tags.
 
 **Details** (`--tags details`) pulls each digest with `podman`, runs inspection commands
 inside the container, and fills in `ansible_core_version`, collections, RPM/pip lists, etc.
@@ -76,7 +79,7 @@ ansible-playbook image_inspector.yml --tags discover -e prune_images=true
 
 # Single image path for this run
 ansible-playbook image_inspector.yml --tags discover \
-  -e '{"image_inspector_image_paths": ["registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8"]}'
+  -e '{"image_inspector_image_paths": [{"path": "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8", "exclude_patterns": ["^latest$"]}]}'
 
 # Validate no duplicate tags across digests
 python3 scripts/check_duplicate_tags.py
@@ -94,7 +97,9 @@ Contributions are highly encouraged! If you find a mistake or have an update for
 
 To add or update an execution environment:
 
-1. Add the image path to `image_inspector_image_paths` in `roles/image_inspector/defaults/main.yml` (if not already listed).
+1. Add the image to `image_inspector_image_paths` in `roles/image_inspector/defaults/main.yml`
+   (and in `image_inspector.yml` if you override paths there), using `path:` and optional
+   `exclude_patterns:`.
 2. Run the workflow above (`discover`, optionally `details`, then `md_generator`).
 3. Submit a pull request with the updated vars files and generated READMEs.
 

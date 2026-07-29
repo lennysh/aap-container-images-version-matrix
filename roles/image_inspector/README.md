@@ -18,7 +18,7 @@ Tags
 
 | Tag | Default | Description |
 |-----|---------|-------------|
-| `discover` | runs | Query the registry (`podman search`, `skopeo inspect`), merge with existing vars, write per-digest files |
+| `discover` | runs | Query the registry (`skopeo list-tags` + parallel `skopeo inspect`), write only new/changed digest vars |
 | `details` | skipped (`never`) | Pull each digest and run in-container inspection commands; updates vars files |
 
 Examples
@@ -36,16 +36,30 @@ ansible-playbook image_inspector.yml --tags discover -e prune_images=true
 
 # Limit to one image path (override defaults for this run)
 ansible-playbook image_inspector.yml --tags discover \
-  -e '{"image_inspector_image_paths": ["registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8"]}'
+  -e '{"image_inspector_image_paths": [{"path": "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8", "exclude_patterns": ["^latest$"]}]}'
+
+# Tune concurrency / retries (defaults: jobs=4, retries=5)
+ansible-playbook image_inspector.yml --tags discover \
+  -e image_inspector_skopeo_jobs=4 \
+  -e image_inspector_skopeo_retries=8
 ```
+
+`discover` lists tags with `skopeo list-tags`, inspects them concurrently (with
+retries, backoff, and a serial cleanup pass), and only rewrites digest vars when
+tags are new or `image_tags` changed. By default, remaining transient failures
+abort the run (`image_inspector_fail_on_failed_tags`). If that is disabled,
+failed tags are preserved on existing digests and prune is skipped so incomplete
+registry data cannot drop live tags. Permanent policy rejections (e.g. rejected
+`latest`) are classified separately and do not abort the run.
 
 Requirements
 ------------
 
-- `podman` — registry tag listing, image pull, and container commands during `details`
-- `skopeo` — digest and creation date during `discover`
+- `podman` — registry login check, image pull, and container commands during `details`
+- `skopeo` — `list-tags` / inspect during `discover`
+- `python3` — runtime for the role's `discover_remote_digests` module
 - `community.general` — `json_query` filter during `details`
-- Registry access to `registry.redhat.io` (`podman login registry.redhat.io`)
+- Registry login: `podman login registry.redhat.io` (verified at start of `discover` / `details`)
 
 Output layout
 -------------
@@ -78,12 +92,14 @@ Role Variables
 --------------
 
 ```yaml
-# A list of container image paths to query
+# Images to query (dict form). Plain strings also work.
 image_inspector_image_paths:
-  - "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8"
-  # ...
+  - path: "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8"
+    exclude_patterns:
+      - "^latest$"   # optional per-image extras (merged with global)
+  - path: "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel8"
 
-# Tag patterns excluded from discovery (regex)
+# Global tag exclude regexes (applied to every image)
 image_inspector_exclude_patterns:
   - "-source"
   - "sha256"
@@ -97,6 +113,20 @@ image_inspector_prune_images: "{{ prune_images | default(false) }}"
 
 # Fallback Python version for Ansible collections path detection
 image_inspector_default_python_version: "3.12"
+
+# Parallel skopeo inspect workers during discover (per image path)
+image_inspector_skopeo_jobs: 4
+
+# Transient list-tags / inspect retries (+ serial cleanup pass)
+image_inspector_skopeo_retries: 5
+image_inspector_skopeo_retry_delay: 1.0
+image_inspector_skopeo_retry_backoff: 2.0
+
+# Abort discover if any tag still fails after retries (recommended)
+image_inspector_fail_on_failed_tags: true
+
+# Fail fast unless podman is logged into registries used by image paths
+image_inspector_require_registry_login: true
 ```
 
 Validation
