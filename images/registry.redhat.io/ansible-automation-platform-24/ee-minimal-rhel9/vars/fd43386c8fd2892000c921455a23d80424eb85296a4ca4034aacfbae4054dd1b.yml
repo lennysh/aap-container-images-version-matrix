@@ -3,9 +3,7 @@ fd43386c8fd2892000c921455a23d80424eb85296a4ca4034aacfbae4054dd1b:
   digest: "sha256:fd43386c8fd2892000c921455a23d80424eb85296a4ca4034aacfbae4054dd1b"
   image_tags:
     - "1784050671"
-    - "2.0"
     - "2.0-1784050671"
-    - "latest"
   created: "2026-07-14 17:42:08 UTC"
   ansible_core_version: "2.16.18"
   python_version: "3.12.13"

@@ -4,7 +4,6 @@
   image_tags:
     - "1.0.0-1783923018"
     - "1783923018"
-    - "latest"
   created: "2026-07-13 06:50:35 UTC"
   ansible_core_version: "2.16.19"
   python_version: "3.12.13"

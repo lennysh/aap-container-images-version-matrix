@@ -3,8 +3,6 @@ c2f65b75880233bbd956fa0e5df695ff1e87888b97d4eeab444bbf5f8eeeaa57:
   digest: "sha256:c2f65b75880233bbd956fa0e5df695ff1e87888b97d4eeab444bbf5f8eeeaa57"
   image_tags:
     - "1782206137"
-    - "2.16"
-    - "2.16.19"
     - "2.16.19-1"
   created: "2026-06-23 09:30:47 UTC"
   ansible_core_version: "2.16.19"
