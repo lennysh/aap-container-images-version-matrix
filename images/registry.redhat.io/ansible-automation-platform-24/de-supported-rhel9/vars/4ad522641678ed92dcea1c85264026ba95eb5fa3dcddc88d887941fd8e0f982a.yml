@@ -1,0 +1,7 @@
+---
+4ad522641678ed92dcea1c85264026ba95eb5fa3dcddc88d887941fd8e0f982a:
+  digest: "sha256:4ad522641678ed92dcea1c85264026ba95eb5fa3dcddc88d887941fd8e0f982a"
+  image_tags:
+    - "1.0.5"
+    - "1.0.5-23"
+  created: "2024-05-16 21:47:22 UTC"

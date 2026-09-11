@@ -1,0 +1,9 @@
+---
+14a95ca61db8fb28cfde5dc0241fbdfc1c4dec269f8eae1125175adc1ee48eb7:
+  digest: "sha256:14a95ca61db8fb28cfde5dc0241fbdfc1c4dec269f8eae1125175adc1ee48eb7"
+  image_tags:
+    - "1.2.0"
+    - "1.2.0-81"
+    - "1.2.0-82"
+    - "1.2.0-83"
+  created: "2026-01-19 20:17:38 UTC"

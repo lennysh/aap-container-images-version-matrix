@@ -1,0 +1,7 @@
+---
+c512481cd912c7b799d2b205d45f18b12bbe6bd6bdf952b6c7fe0227824ab978:
+  digest: "sha256:c512481cd912c7b799d2b205d45f18b12bbe6bd6bdf952b6c7fe0227824ab978"
+  image_tags:
+    - "1.1.7-20"
+    - "1779774245"
+  created: "2026-05-26 05:44:06 UTC"

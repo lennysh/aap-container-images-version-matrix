@@ -1,0 +1,6 @@
+---
+f3d6a81cc369a107a11666225a841cd48e1807e6322d07fe7d8ee3f1c7310bf0:
+  digest: "sha256:f3d6a81cc369a107a11666225a841cd48e1807e6322d07fe7d8ee3f1c7310bf0"
+  image_tags:
+    - "1.1.7-16"
+  created: "2025-12-16 10:40:49 UTC"

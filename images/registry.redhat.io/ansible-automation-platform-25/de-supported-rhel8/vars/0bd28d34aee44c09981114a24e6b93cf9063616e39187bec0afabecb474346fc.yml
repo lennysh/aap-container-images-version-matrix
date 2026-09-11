@@ -1,0 +1,6 @@
+---
+0bd28d34aee44c09981114a24e6b93cf9063616e39187bec0afabecb474346fc:
+  digest: "sha256:0bd28d34aee44c09981114a24e6b93cf9063616e39187bec0afabecb474346fc"
+  image_tags:
+    - "1.1.7-20"
+  created: "2026-04-28 17:54:43 UTC"

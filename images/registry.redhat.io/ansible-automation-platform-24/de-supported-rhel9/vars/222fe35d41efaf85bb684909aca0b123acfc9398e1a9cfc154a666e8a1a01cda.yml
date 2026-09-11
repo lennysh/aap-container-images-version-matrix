@@ -1,0 +1,6 @@
+---
+222fe35d41efaf85bb684909aca0b123acfc9398e1a9cfc154a666e8a1a01cda:
+  digest: "sha256:222fe35d41efaf85bb684909aca0b123acfc9398e1a9cfc154a666e8a1a01cda"
+  image_tags:
+    - "1.0.0-78"
+  created: "2023-07-18 19:50:11 UTC"

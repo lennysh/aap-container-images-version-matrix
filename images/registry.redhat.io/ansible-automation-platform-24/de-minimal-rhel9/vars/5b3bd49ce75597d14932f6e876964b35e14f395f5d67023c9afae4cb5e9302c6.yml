@@ -1,0 +1,6 @@
+---
+5b3bd49ce75597d14932f6e876964b35e14f395f5d67023c9afae4cb5e9302c6:
+  digest: "sha256:5b3bd49ce75597d14932f6e876964b35e14f395f5d67023c9afae4cb5e9302c6"
+  image_tags:
+    - "1.0.0-60"
+  created: "2023-06-20 14:50:42 UTC"

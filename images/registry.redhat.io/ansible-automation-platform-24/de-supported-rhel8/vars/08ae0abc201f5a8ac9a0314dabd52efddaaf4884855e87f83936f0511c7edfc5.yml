@@ -1,0 +1,8 @@
+---
+08ae0abc201f5a8ac9a0314dabd52efddaaf4884855e87f83936f0511c7edfc5:
+  digest: "sha256:08ae0abc201f5a8ac9a0314dabd52efddaaf4884855e87f83936f0511c7edfc5"
+  image_tags:
+    - "1.0.8-25"
+    - "1.0.8-26"
+    - "1.0.8-27"
+  created: "2026-01-15 16:24:39 UTC"

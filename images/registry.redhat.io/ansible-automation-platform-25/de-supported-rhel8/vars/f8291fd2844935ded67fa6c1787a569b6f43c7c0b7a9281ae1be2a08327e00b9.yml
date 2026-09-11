@@ -1,0 +1,7 @@
+---
+f8291fd2844935ded67fa6c1787a569b6f43c7c0b7a9281ae1be2a08327e00b9:
+  digest: "sha256:f8291fd2844935ded67fa6c1787a569b6f43c7c0b7a9281ae1be2a08327e00b9"
+  image_tags:
+    - "1.1.4"
+    - "1.1.4-33"
+  created: "2025-04-03 04:55:34 UTC"

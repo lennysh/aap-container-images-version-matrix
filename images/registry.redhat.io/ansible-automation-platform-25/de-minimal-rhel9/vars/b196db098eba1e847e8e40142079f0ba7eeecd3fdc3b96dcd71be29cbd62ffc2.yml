@@ -1,0 +1,7 @@
+---
+b196db098eba1e847e8e40142079f0ba7eeecd3fdc3b96dcd71be29cbd62ffc2:
+  digest: "sha256:b196db098eba1e847e8e40142079f0ba7eeecd3fdc3b96dcd71be29cbd62ffc2"
+  image_tags:
+    - "1.1.2"
+    - "1.1.2-36"
+  created: "2025-02-28 18:29:43 UTC"

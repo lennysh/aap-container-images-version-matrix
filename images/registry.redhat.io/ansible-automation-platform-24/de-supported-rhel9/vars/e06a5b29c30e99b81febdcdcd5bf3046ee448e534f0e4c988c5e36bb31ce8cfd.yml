@@ -1,0 +1,7 @@
+---
+e06a5b29c30e99b81febdcdcd5bf3046ee448e534f0e4c988c5e36bb31ce8cfd:
+  digest: "sha256:e06a5b29c30e99b81febdcdcd5bf3046ee448e534f0e4c988c5e36bb31ce8cfd"
+  image_tags:
+    - "1.0.7"
+    - "1.0.7-68"
+  created: "2025-03-20 03:35:25 UTC"

@@ -1,0 +1,6 @@
+---
+1b539b46315edf843634a903e3a6ef23aeff77e127f46bbd61d3d152b1174169:
+  digest: "sha256:1b539b46315edf843634a903e3a6ef23aeff77e127f46bbd61d3d152b1174169"
+  image_tags:
+    - "1.0.8-11"
+  created: "2025-07-23 00:03:15 UTC"

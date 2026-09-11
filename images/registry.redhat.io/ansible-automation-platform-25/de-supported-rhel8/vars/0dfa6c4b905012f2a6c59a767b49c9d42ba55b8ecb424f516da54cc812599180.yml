@@ -1,0 +1,6 @@
+---
+0dfa6c4b905012f2a6c59a767b49c9d42ba55b8ecb424f516da54cc812599180:
+  digest: "sha256:0dfa6c4b905012f2a6c59a767b49c9d42ba55b8ecb424f516da54cc812599180"
+  image_tags:
+    - "1.1.7-12"
+  created: "2025-09-17 21:22:03 UTC"

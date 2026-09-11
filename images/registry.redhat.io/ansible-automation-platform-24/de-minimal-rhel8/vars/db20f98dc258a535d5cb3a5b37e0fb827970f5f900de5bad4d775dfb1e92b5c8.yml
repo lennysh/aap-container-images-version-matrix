@@ -1,0 +1,6 @@
+---
+db20f98dc258a535d5cb3a5b37e0fb827970f5f900de5bad4d775dfb1e92b5c8:
+  digest: "sha256:db20f98dc258a535d5cb3a5b37e0fb827970f5f900de5bad4d775dfb1e92b5c8"
+  image_tags:
+    - "1.0.8-27"
+  created: "2025-11-13 13:51:09 UTC"

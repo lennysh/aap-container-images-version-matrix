@@ -1,0 +1,7 @@
+---
+7dd9637cc473e4fed52f3537c3918ab609f7ad51035ae75aaee9c0ff33ffe6c7:
+  digest: "sha256:7dd9637cc473e4fed52f3537c3918ab609f7ad51035ae75aaee9c0ff33ffe6c7"
+  image_tags:
+    - "1.1.2"
+    - "1.1.2-37"
+  created: "2025-02-28 18:30:13 UTC"

@@ -1,0 +1,6 @@
+---
+8e4d501fe5f6df6429870ff1232bcb5d9ce7f431792b47433642606c0776eaad:
+  digest: "sha256:8e4d501fe5f6df6429870ff1232bcb5d9ce7f431792b47433642606c0776eaad"
+  image_tags:
+    - "1.0.8-6"
+  created: "2025-05-01 19:02:32 UTC"

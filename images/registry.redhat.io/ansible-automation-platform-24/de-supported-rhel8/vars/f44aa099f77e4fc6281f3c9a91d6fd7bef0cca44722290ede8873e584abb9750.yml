@@ -1,0 +1,6 @@
+---
+f44aa099f77e4fc6281f3c9a91d6fd7bef0cca44722290ede8873e584abb9750:
+  digest: "sha256:f44aa099f77e4fc6281f3c9a91d6fd7bef0cca44722290ede8873e584abb9750"
+  image_tags:
+    - "1.0.3-27"
+  created: "2023-12-12 00:03:32 UTC"

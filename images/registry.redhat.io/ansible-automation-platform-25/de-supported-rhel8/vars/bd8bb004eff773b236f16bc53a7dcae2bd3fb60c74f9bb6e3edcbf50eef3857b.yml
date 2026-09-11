@@ -1,0 +1,6 @@
+---
+bd8bb004eff773b236f16bc53a7dcae2bd3fb60c74f9bb6e3edcbf50eef3857b:
+  digest: "sha256:bd8bb004eff773b236f16bc53a7dcae2bd3fb60c74f9bb6e3edcbf50eef3857b"
+  image_tags:
+    - "1.1.7-19"
+  created: "2026-03-25 03:35:25 UTC"

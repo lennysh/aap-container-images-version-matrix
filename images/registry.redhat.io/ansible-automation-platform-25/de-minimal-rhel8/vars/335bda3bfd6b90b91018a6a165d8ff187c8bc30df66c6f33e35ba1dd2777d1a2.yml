@@ -1,0 +1,7 @@
+---
+335bda3bfd6b90b91018a6a165d8ff187c8bc30df66c6f33e35ba1dd2777d1a2:
+  digest: "sha256:335bda3bfd6b90b91018a6a165d8ff187c8bc30df66c6f33e35ba1dd2777d1a2"
+  image_tags:
+    - "1.1.6"
+    - "1.1.6-11"
+  created: "2025-05-28 20:18:10 UTC"
