@@ -1,5 +1,5 @@
 ---
-- name: Inspect and Catalog Execution Environments
+- name: Generate Markdown Reports for AAP Container Images
   hosts: localhost
   connection: local
   gather_facts: false

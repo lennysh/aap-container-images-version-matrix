@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/lennysh/lennysh-aap-execution-environments-version-matrix/schemas/image_digest.schema.json",
-  "title": "Image digest inspection record file",
+  "$id": "https://github.com/lennysh/aap-container-images-version-matrix/schemas/image_digest.schema.json",
+  "title": "AAP container image digest inspection record file",
   "description": "Per-digest Ansible vars file under images/<image_path>/vars/<digest-hex>.yml. Top-level key is the digest hex (matches filename) so include_vars dir can load an entire vars/ folder in one task.",
   "type": "object",
   "minProperties": 1,

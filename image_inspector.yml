@@ -1,42 +1,11 @@
 ---
-- name: Inspect and Catalog Execution Environments
+- name: Inspect and Catalog AAP Container Images
   hosts: localhost
   connection: local
   gather_facts: false
 
   vars:
     prune_images: true
-    # Use dict form so per-image exclude_patterns (e.g. ^latest$) are not lost.
-    # Plain strings wipe the role defaults' per-image excludes.
-    image_paths:
-      - path: "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8"
-        exclude_patterns:
-          - "^latest$"
-      - path: "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel9"
-        exclude_patterns:
-          - "^latest$"
-      - path: "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel8"
-      - path: "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9"
-      - path: "registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel8"
-      - path: "registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9"
-      - path: "registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8"
-      - path: "registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9"
-      - path: "registry.redhat.io/ansible-automation-platform-25/ee-supported-rhel8"
-      - path: "registry.redhat.io/ansible-automation-platform-25/ee-supported-rhel9"
-      - path: "registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9"
-      # - path: "registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel10"
-      - path: "registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel9"
-      # - path: "registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel10"
-      - path: "registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9"
-      # - path: "registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel10"
-      - path: "registry.redhat.io/ansible-automation-platform-27/ee-supported-rhel9"
-      # - path: "registry.redhat.io/ansible-automation-platform-27/ee-supported-rhel10"
-      - path: "registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel8"
-      - path: "registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel9"
 
   roles:
     - role: image_inspector
-      vars:
-        image_inspector_image_paths: "{{ image_paths }}"
-        image_inspector_prune_images: "{{ prune_images }}"
-    # - role: md_generator

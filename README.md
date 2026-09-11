@@ -1,8 +1,8 @@
-# Red Hat Ansible Automation Platform Execution Environment Version Matrix
+# Red Hat Ansible Automation Platform Container Images Version Matrix
 
-[![GitHub last commit](https://img.shields.io/github/last-commit/lennysh/aap-ee-version-matrix.svg)](https://github.com/lennysh/aap-ee-version-matrix/commits/main) [![GitHub license](https://img.shields.io/github/license/lennysh/aap-ee-version-matrix.svg)](https://github.com/lennysh/aap-ee-version-matrix/blob/main/LICENSE) [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/lennysh/aap-ee-version-matrix/pulls) ![GitHub contributors](https://img.shields.io/github/contributors/lennysh/aap-ee-version-matrix) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/lennysh/aap-ee-version-matrix)
+[![GitHub last commit](https://img.shields.io/github/last-commit/lennysh/aap-container-images-version-matrix.svg)](https://github.com/lennysh/aap-container-images-version-matrix/commits/main) [![GitHub license](https://img.shields.io/github/license/lennysh/aap-container-images-version-matrix.svg)](https://github.com/lennysh/aap-container-images-version-matrix/blob/main/LICENSE) [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/lennysh/aap-container-images-version-matrix/pulls) ![GitHub contributors](https://img.shields.io/github/contributors/lennysh/aap-container-images-version-matrix) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/lennysh/aap-container-images-version-matrix)
 
-This repository is a community-driven version matrix for Red Hat Ansible Automation Platform (AAP) Execution Environments (EEs). It provides a quick reference for the package versions (`ansible-core`, `python`), included Ansible Collections, and OS details for each official EE image.
+This repository is a community-driven version matrix for Red Hat Ansible Automation Platform (AAP) container images. It provides a quick reference for the package versions (`ansible-core`, `python`), included Ansible Collections, and OS details for each official Execution Environment (EE) and Decision Environment (DE) image.
 
 ## 📋 Available Execution Environments
 
@@ -30,6 +30,23 @@ The tables below are automatically generated. Click on an image name to see deta
 | [registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel9](./images/registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel9/README.md) |
 
 [comment]: <> (END Ansible Managed)
+
+## 📋 Available Decision Environments
+
+| Image Name (Click for more details) |
+| :---------------------------------- |
+| [registry.redhat.io/ansible-automation-platform-24/de-minimal-rhel8](./images/registry.redhat.io/ansible-automation-platform-24/de-minimal-rhel8/README.md) |
+| [registry.redhat.io/ansible-automation-platform-24/de-minimal-rhel9](./images/registry.redhat.io/ansible-automation-platform-24/de-minimal-rhel9/README.md) |
+| [registry.redhat.io/ansible-automation-platform-24/de-supported-rhel8](./images/registry.redhat.io/ansible-automation-platform-24/de-supported-rhel8/README.md) |
+| [registry.redhat.io/ansible-automation-platform-24/de-supported-rhel9](./images/registry.redhat.io/ansible-automation-platform-24/de-supported-rhel9/README.md) |
+| [registry.redhat.io/ansible-automation-platform-25/de-minimal-rhel8](./images/registry.redhat.io/ansible-automation-platform-25/de-minimal-rhel8/README.md) |
+| [registry.redhat.io/ansible-automation-platform-25/de-minimal-rhel9](./images/registry.redhat.io/ansible-automation-platform-25/de-minimal-rhel9/README.md) |
+| [registry.redhat.io/ansible-automation-platform-25/de-supported-rhel8](./images/registry.redhat.io/ansible-automation-platform-25/de-supported-rhel8/README.md) |
+| [registry.redhat.io/ansible-automation-platform-25/de-supported-rhel9](./images/registry.redhat.io/ansible-automation-platform-25/de-supported-rhel9/README.md) |
+| [registry.redhat.io/ansible-automation-platform-26/de-minimal-rhel9](./images/registry.redhat.io/ansible-automation-platform-26/de-minimal-rhel9/README.md) |
+| [registry.redhat.io/ansible-automation-platform-26/de-supported-rhel9](./images/registry.redhat.io/ansible-automation-platform-26/de-supported-rhel9/README.md) |
+| [registry.redhat.io/ansible-automation-platform-27/de-minimal-rhel9](./images/registry.redhat.io/ansible-automation-platform-27/de-minimal-rhel9/README.md) |
+| [registry.redhat.io/ansible-automation-platform-27/de-supported-rhel9](./images/registry.redhat.io/ansible-automation-platform-27/de-supported-rhel9/README.md) |
 
 ## 🛠 Updating the version matrix
 
@@ -95,11 +112,10 @@ See also:
 
 Contributions are highly encouraged! If you find a mistake or have an update for a new release, please help improve this resource.
 
-To add or update an execution environment:
+To add or update an execution environment or decision environment:
 
-1. Add the image to `image_inspector_image_paths` in `roles/image_inspector/defaults/main.yml`
-   (and in `image_inspector.yml` if you override paths there), using `path:` and optional
-   `exclude_patterns:`.
+1. Add the image to `image_inspector_image_paths` in `roles/image_inspector/defaults/main.yml`,
+   using `path:` and optional `exclude_patterns:`.
 2. Run the workflow above (`discover`, optionally `details`, then `md_generator`).
 3. Submit a pull request with the updated vars files and generated READMEs.
 
