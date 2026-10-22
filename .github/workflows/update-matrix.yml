@@ -1,0 +1,145 @@
+# Manually refresh AAP EE/DE digest vars and per-image READMEs.
+# Requires repository secrets:
+#   REGISTRY_REDHAT_IO_USERNAME
+#   REGISTRY_REDHAT_IO_PASSWORD
+name: Update version matrix
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_details:
+        description: Pull images and inspect package/collection contents (slow, disk-heavy)
+        type: boolean
+        default: false
+      prune_images:
+        description: Drop digest vars files that no longer exist in the registry
+        type: boolean
+        default: true
+      image_path:
+        description: Optional single image path (leave empty for all configured images)
+        type: string
+        required: false
+        default: ""
+      open_pull_request:
+        description: Open a pull request with the changes (instead of only leaving a dirty workspace)
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-matrix
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.run_details && 360 || 90 }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install podman and skopeo
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y podman skopeo
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible and PyYAML
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install "ansible-core>=2.15,<2.19" PyYAML
+
+      - name: Log in to registry.redhat.io
+        env:
+          REGISTRY_USER: ${{ secrets.REGISTRY_REDHAT_IO_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${REGISTRY_USER}" || -z "${REGISTRY_PASSWORD}" ]]; then
+            echo "::error::Set repository secrets REGISTRY_REDHAT_IO_USERNAME and REGISTRY_REDHAT_IO_PASSWORD (Red Hat registry service account)."
+            exit 1
+          fi
+          echo "${REGISTRY_PASSWORD}" | podman login registry.redhat.io \
+            --username "${REGISTRY_USER}" \
+            --password-stdin
+          podman login --get-login registry.redhat.io
+
+      - name: Run image inspector
+        env:
+          IMAGE_PATH: ${{ inputs.image_path }}
+          PRUNE_IMAGES: ${{ inputs.prune_images }}
+          RUN_DETAILS: ${{ inputs.run_details }}
+        run: |
+          set -euo pipefail
+          tags="discover"
+          if [[ "${RUN_DETAILS}" == "true" ]]; then
+            tags="discover,details"
+          fi
+
+          cmd=(ansible-playbook image_inspector.yml --tags "${tags}" -e "prune_images=${PRUNE_IMAGES}")
+          if [[ -n "${IMAGE_PATH}" ]]; then
+            # Single-path list matching image_inspector_image_paths schema.
+            cmd+=(-e "{\"image_inspector_image_paths\": [{\"path\": \"${IMAGE_PATH}\"}]}")
+          fi
+
+          printf 'Running:';
+          printf '%q ' "${cmd[@]}"
+          printf '\n'
+          "${cmd[@]}"
+
+      - name: Regenerate per-image READMEs
+        run: ansible-playbook md_generator.yml
+
+      - name: Check for duplicate tags across digests
+        run: python3 scripts/check_duplicate_tags.py
+
+      - name: Detect changes
+        id: changes
+        run: |
+          set -euo pipefail
+          if git status --porcelain | grep -q .; then
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+            git status --short
+          else
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            echo "No matrix changes detected."
+          fi
+
+      - name: Create pull request
+        if: ${{ inputs.open_pull_request && steps.changes.outputs.changed == 'true' }}
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            chore: refresh AAP EE/DE version matrix
+
+            Automated update via Update version matrix workflow.
+          title: "chore: refresh AAP EE/DE version matrix"
+          body: |
+            ## Summary
+            Automated refresh of digest vars and per-image READMEs.
+
+            | Option | Value |
+            | --- | --- |
+            | `run_details` | `${{ inputs.run_details }}` |
+            | `prune_images` | `${{ inputs.prune_images }}` |
+            | `image_path` | `${{ inputs.image_path || '(all configured images)' }}` |
+
+            ## Test plan
+            - [ ] Spot-check new/changed digests under `images/**/vars/`
+            - [ ] Confirm generated `images/**/README.md` tables look correct
+            - [ ] Merge when ready
+          branch: chore/update-matrix
+          delete-branch: true
+          add-paths: |
+            images

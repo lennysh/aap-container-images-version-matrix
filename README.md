@@ -53,13 +53,26 @@ The tables below are automatically generated. Click on an image name to see deta
 The tables above are generated from Ansible vars files. Do **not** edit `images/**/README.md`
 directly — run the playbooks below instead.
 
-### Prerequisites
+### GitHub Actions (recommended)
+
+Use the **Update version matrix** workflow for a manual refresh without running the playbooks locally:
+
+1. Add repository secrets (Settings → Secrets and variables → Actions):
+   - `REGISTRY_REDHAT_IO_USERNAME` — Red Hat registry service-account username
+   - `REGISTRY_REDHAT_IO_PASSWORD` — Red Hat registry service-account token/password
+2. Actions → **Update version matrix** → **Run workflow**
+3. Choose options (`run_details` is off by default; leave it off for a fast tag/digest refresh), then run
+4. Review and merge the pull request the workflow opens when something changed
+
+Create a service account at [Red Hat Hybrid Cloud Console → Service Accounts](https://console.redhat.com/iam/service-accounts) (or equivalent registry credentials that can pull from `registry.redhat.io`).
+
+### Prerequisites (local)
 
 - Ansible 2.15+ with the `community.general` collection
 - `podman` and `skopeo` on your PATH
 - Access to `registry.redhat.io` (`podman login registry.redhat.io`)
 
-### Workflow
+### Local workflow
 
 Run from the repository root:
 
