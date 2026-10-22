@@ -116,7 +116,9 @@ jobs:
           fi
 
       - name: Create pull request
+        id: cpr
         if: ${{ inputs.open_pull_request && steps.changes.outputs.changed == 'true' }}
+        continue-on-error: true
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -143,3 +145,22 @@ jobs:
           delete-branch: true
           add-paths: |
             images
+
+      - name: Report pull request result
+        if: ${{ inputs.open_pull_request && steps.changes.outputs.changed == 'true' }}
+        env:
+          CPR_OUTCOME: ${{ steps.cpr.outcome }}
+          PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [[ "${CPR_OUTCOME}" == "success" && -n "${PR_URL}" ]]; then
+            echo "Pull request: ${PR_URL}"
+            exit 0
+          fi
+          echo "::error::Could not create the pull request. Branch chore/update-matrix was likely pushed already."
+          echo "Enable: Settings → Actions → General → Workflow permissions →"
+          echo "  'Allow GitHub Actions to create and approve pull requests'"
+          echo "Then open: https://github.com/${REPO}/pull/new/chore/update-matrix"
+          echo "Or re-run this workflow after enabling the setting."
+          exit 1

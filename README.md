@@ -60,9 +60,12 @@ Use the **Update version matrix** workflow for a manual refresh without running 
 1. Add repository secrets (Settings → Secrets and variables → Actions):
    - `REGISTRY_REDHAT_IO_USERNAME` — Red Hat registry service-account username
    - `REGISTRY_REDHAT_IO_PASSWORD` — Red Hat registry service-account token/password
-2. Actions → **Update version matrix** → **Run workflow**
-3. Choose options (`run_details` is off by default; leave it off for a fast tag/digest refresh), then run
-4. Review and merge the pull request the workflow opens when something changed
+2. Allow Actions to open PRs (Settings → Actions → General → Workflow permissions):
+   - Read and write permissions
+   - **Allow GitHub Actions to create and approve pull requests**
+3. Actions → **Update version matrix** → **Run workflow**
+4. Choose options (`run_details` is off by default; leave it off for a fast tag/digest refresh), then run
+5. Review and merge the pull request the workflow opens when something changed
 
 Create a service account at [Red Hat Hybrid Cloud Console → Service Accounts](https://console.redhat.com/iam/service-accounts) (or equivalent registry credentials that can pull from `registry.redhat.io`).
 
