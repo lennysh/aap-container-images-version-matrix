@@ -1,0 +1,8 @@
+---
+589645af49a6f902ed4ac9dadd435a408b3a44d78d8dae337eeae1f8252672c9:
+  digest: "sha256:589645af49a6f902ed4ac9dadd435a408b3a44d78d8dae337eeae1f8252672c9"
+  image_tags:
+    - "1792392312"
+    - "2.20"
+    - "2.20-1792392312"
+  created: "2026-10-19 06:59:34 UTC"

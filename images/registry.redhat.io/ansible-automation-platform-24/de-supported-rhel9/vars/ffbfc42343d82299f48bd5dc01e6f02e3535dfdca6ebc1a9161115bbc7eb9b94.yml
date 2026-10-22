@@ -2,11 +2,8 @@
 ffbfc42343d82299f48bd5dc01e6f02e3535dfdca6ebc1a9161115bbc7eb9b94:
   digest: "sha256:ffbfc42343d82299f48bd5dc01e6f02e3535dfdca6ebc1a9161115bbc7eb9b94"
   image_tags:
-    - "1.0"
-    - "1.0.9"
     - "1.0.9-1789616044"
     - "1789616044"
-    - "latest"
   created: "2026-09-17 03:35:20 UTC"
   ansible_core_version: "2.16.18"
   python_version: "3.12.14"

@@ -4,7 +4,6 @@ affe39b0d8ffff41005dbaa24c641e191b6d7637392d8611ea889bb22109a41a:
   image_tags:
     - "1.0.0-1791258340"
     - "1791258340"
-    - "latest"
   created: "2026-10-06 04:25:27 UTC"
   ansible_core_version: "2.16.19"
   python_version: "3.12.14"
