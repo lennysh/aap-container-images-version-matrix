@@ -1,0 +1,8 @@
+---
+b08dcf736e08e75c4c6b462545bbce85690cc55c45fee3d0eb1516a28b149473:
+  digest: "sha256:b08dcf736e08e75c4c6b462545bbce85690cc55c45fee3d0eb1516a28b149473"
+  image_tags:
+    - "1.0.0-1792396518"
+    - "1792396518"
+    - "latest"
+  created: "2026-10-19 08:35:16 UTC"

@@ -1,0 +1,10 @@
+---
+2b2aadcc4832c4e4b72bec2f6fb9f6375f46aaa65fe0a49ba50548f578383361:
+  digest: "sha256:2b2aadcc4832c4e4b72bec2f6fb9f6375f46aaa65fe0a49ba50548f578383361"
+  image_tags:
+    - "1.0"
+    - "1.0.9"
+    - "1.0.9-1791948512"
+    - "1791948512"
+    - "latest"
+  created: "2026-10-14 03:30:05 UTC"

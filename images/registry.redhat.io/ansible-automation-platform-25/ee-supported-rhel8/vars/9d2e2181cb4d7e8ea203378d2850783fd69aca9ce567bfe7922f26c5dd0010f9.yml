@@ -1,0 +1,9 @@
+---
+9d2e2181cb4d7e8ea203378d2850783fd69aca9ce567bfe7922f26c5dd0010f9:
+  digest: "sha256:9d2e2181cb4d7e8ea203378d2850783fd69aca9ce567bfe7922f26c5dd0010f9"
+  image_tags:
+    - "1791895517"
+    - "2.0"
+    - "2.0-1791895517"
+    - "latest"
+  created: "2026-10-13 13:08:15 UTC"
