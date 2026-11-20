@@ -3,9 +3,7 @@
   digest: "sha256:00884e77d68f5299b94fa31134e4d561b14714cefc0edff70983111169f970d3"
   image_tags:
     - "1793166407"
-    - "2.0"
     - "2.0-1793166407"
-    - "latest"
   created: "2026-10-28 05:57:20 UTC"
   ansible_core_version: "2.16.18"
   python_version: "3.12.15"
