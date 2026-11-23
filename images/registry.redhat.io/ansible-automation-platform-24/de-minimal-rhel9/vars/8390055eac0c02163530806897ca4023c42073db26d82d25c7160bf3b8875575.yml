@@ -2,11 +2,8 @@
 8390055eac0c02163530806897ca4023c42073db26d82d25c7160bf3b8875575:
   digest: "sha256:8390055eac0c02163530806897ca4023c42073db26d82d25c7160bf3b8875575"
   image_tags:
-    - "1.0"
-    - "1.0.9"
     - "1.0.9-1793309019"
     - "1793309019"
-    - "latest"
   created: "2026-10-29 21:23:51 UTC"
   ansible_core_version: "2.16.18"
   python_version: "3.12.15"

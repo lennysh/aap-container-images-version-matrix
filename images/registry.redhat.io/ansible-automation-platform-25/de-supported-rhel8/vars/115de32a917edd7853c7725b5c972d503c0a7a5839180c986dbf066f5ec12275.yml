@@ -2,11 +2,8 @@
 115de32a917edd7853c7725b5c972d503c0a7a5839180c986dbf066f5ec12275:
   digest: "sha256:115de32a917edd7853c7725b5c972d503c0a7a5839180c986dbf066f5ec12275"
   image_tags:
-    - "1.1"
-    - "1.1.7"
     - "1.1.7-1793401598"
     - "1793401598"
-    - "latest"
   created: "2026-10-30 23:06:48 UTC"
   ansible_core_version: "2.16.19"
   python_version: "3.12.15"

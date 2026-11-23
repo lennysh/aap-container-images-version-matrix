@@ -3,7 +3,6 @@ f4bcc1c2a8e715b2f02629bd5022cf6890bc43b13837ace70c8ce15bcee4a837:
   digest: "sha256:f4bcc1c2a8e715b2f02629bd5022cf6890bc43b13837ace70c8ce15bcee4a837"
   image_tags:
     - "1793345395"
-    - "2.20"
     - "2.20-1793345395"
   created: "2026-10-30 07:43:09 UTC"
   ansible_core_version: "2.20.10"
