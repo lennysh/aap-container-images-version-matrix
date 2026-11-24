@@ -15,6 +15,7 @@ image_inspector_image_paths:
   - path: "registry.redhat.io/ansible-automation-platform/ee-minimal-rhel9"
     exclude_patterns:
       - "^latest$"
+
   - path: "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel8"
   - path: "registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9"
   - path: "registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel8"
@@ -31,8 +32,10 @@ image_inspector_image_paths:
   # - path: "registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel10"
   - path: "registry.redhat.io/ansible-automation-platform-27/ee-supported-rhel9"
   # - path: "registry.redhat.io/ansible-automation-platform-27/ee-supported-rhel10"
+
   - path: "registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel8"
   - path: "registry.redhat.io/ansible-automation-platform-tech-preview/ee-minimal-rhel9"
+
   - path: "registry.redhat.io/ansible-automation-platform-24/de-minimal-rhel8"
   - path: "registry.redhat.io/ansible-automation-platform-24/de-minimal-rhel9"
   - path: "registry.redhat.io/ansible-automation-platform-24/de-supported-rhel8"
@@ -45,6 +48,10 @@ image_inspector_image_paths:
   - path: "registry.redhat.io/ansible-automation-platform-26/de-supported-rhel9"
   - path: "registry.redhat.io/ansible-automation-platform-27/de-minimal-rhel9"
   - path: "registry.redhat.io/ansible-automation-platform-27/de-supported-rhel9"
+
+  - path: "registry.redhat.io/ansible-automation-platform-25/ansible-dev-tools-rhel9"
+  - path: "registry.redhat.io/ansible-automation-platform-26/ansible-dev-tools-rhel9"
+  - path: "registry.redhat.io/ansible-automation-platform-27/ansible-dev-tools-rhel9"
 
 # Global tag exclude regexes (applied to every image, then per-image exclude_patterns)
 image_inspector_exclude_patterns:
